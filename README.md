@@ -95,7 +95,7 @@ queryBuilder := sq.Select("name, id").From("example")
 queryBuilder, err := queryBuilder.Filters(filters)
 
 query := queryBuilder.ToSql()
-// query == `SELECT name, id FROM example WHERE name = "someone" AND id = 1`
+// query == `SELECT name, id FROM example WHERE example.name = "someone" AND example.id = 1`
 
 ```
 
