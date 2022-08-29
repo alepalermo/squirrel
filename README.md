@@ -84,7 +84,7 @@ type Example struct {
 }
 ```
 
-And build the Qhere clause with it:
+And build the WHERE clause with it:
 ```go
 filters := Example{Name:"someone", ID: 1}
 
