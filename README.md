@@ -79,8 +79,8 @@ Tag your structs to name your database fields:
 ```go
 // Tag a Struct with the db tag
 type Example struct {
-    Name string `db:example.name`
-    ID int64 `db:example.id`
+    Name string `db:"example.name"`
+    ID int64 `db:"example.id"`
 }
 ```
 
