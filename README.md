@@ -1,6 +1,9 @@
 [![Stability: Maintenance](https://masterminds.github.io/stability/maintenance.svg)](https://masterminds.github.io/stability/maintenance.html)
-### Squirrel is "complete".
-Bug fixes will still be merged (slowly). Bug reports are welcome, but I will not necessarily respond to them. If another fork (or substantially similar project) actively improves on what Squirrel does, let me know and I may link to it here.
+### This is a Fork with some improvements from the original Squirrel package
+
+The main difference with the original squirrel, is this package has the ability to tag structs with database fields, so know you can get the names from the database field a struct represents and build a Where clause for a Select automatically from a DTO struct automatically, without the risk of a SQL injection. 
+
+Please check the documentation bellow
 
 
 # Squirrel - fluent SQL generator for Go
@@ -69,6 +72,31 @@ dbCache := sq.NewStmtCache(db)
 // StatementBuilder keeps your syntax neat
 mydb := sq.StatementBuilder.RunWith(dbCache)
 select_users := mydb.Select("*").From("users")
+```
+
+Tag your structs to name your database fields:
+
+```go
+// Tag a Struct with the db tag
+type Example struct {
+    Name string `db:example.name`
+    ID int64 `db:example.id`
+}
+```
+
+And build the Qhere clause with it:
+```go
+filters := Example{Name:"someone", ID: 1}
+
+// Create a Select builder
+queryBuilder := sq.Select("name, id").From("example")
+
+// Add Where clauses 
+queryBuilder, err := queryBuilder.Filters(filters)
+
+query := queryBuilder.ToSql()
+// query == `SELECT name, id FROM example WHERE name = "someone" AND id = 1`
+
 ```
 
 Squirrel loves PostgreSQL:
