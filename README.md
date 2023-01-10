@@ -1,7 +1,7 @@
 [![Stability: Maintenance](https://masterminds.github.io/stability/maintenance.svg)](https://masterminds.github.io/stability/maintenance.html)
 ### This is a Fork with some improvements from the original Squirrel package
 
-The main difference with the original squirrel, is this package has the ability to tag structs with database fields, so know you can get the names from the database field a struct represents and build a Where clause for a Select automatically from a DTO struct automatically, without the risk of a SQL injection. 
+The main difference with the original squirrel, is this package has the ability to tag structs with database fields, so now you can get the names from the database field a struct represents and build a Where clause for a Select from a DTO struct automatically, without the risk of a SQL injection. 
 
 Please check the documentation bellow
 
