@@ -32,22 +32,24 @@ func DBTAG(st any, field string) (string, error) {
 // MarshallDB returns a map with the Database Field Name & its Value
 // from the struct passed as parameter.
 // if no 'db' tag is found in a field, that field wont be in the retuned map
-func MarshallDB(st any) (map[string]interface{}, error) {
+func MarshallDB(st any) (map[string]interface{}, []string, error) {
 	values := map[string]interface{}{}
 	if reflect.TypeOf(st).Kind() != reflect.Struct {
-		return values, errNotAStruct
+		return values, []string{}, errNotAStruct
 	}
+	dbfields := []string{}
 	reflection := reflect.ValueOf(st)
 	reflectionType := reflection.Type()
 	for i := 0; i < reflection.NumField(); i++ {
 		if reflection.Field(i).Kind() == reflect.Struct {
 			// support nested struct
-			nestedFields, err := MarshallDB(reflection.Field(i).Interface())
+			nestedFields, _, err := MarshallDB(reflection.Field(i).Interface())
 			if err != nil {
-				return values, err
+				return values, []string{}, err
 			}
 			for k, v := range nestedFields {
 				values[k] = v
+				dbfields = append(dbfields, k)
 			}
 		} else {
 			dbfield, err := DBTAG(st, reflectionType.Field(i).Name)
@@ -55,11 +57,13 @@ func MarshallDB(st any) (map[string]interface{}, error) {
 				if err == errEmptyDBTag {
 					continue
 				}
-				return values, err
+				return values, []string{}, err
 			}
 			values[dbfield] = reflection.Field(i).Interface()
+			dbfields = append(dbfields, dbfield)
+
 		}
 	}
 
-	return values, nil
+	return values, dbfields, nil
 }
