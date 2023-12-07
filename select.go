@@ -266,7 +266,8 @@ func (b SelectBuilder) Columns(columns ...string) SelectBuilder {
 // Column adds a result column to the query.
 // Unlike Columns, Column accepts args which will be bound to placeholders in
 // the columns string, for example:
-//   Column("IF(col IN ("+squirrel.Placeholders(3)+"), 1, 0) as col", 1, 2, 3)
+//
+//	Column("IF(col IN ("+squirrel.Placeholders(3)+"), 1, 0) as col", 1, 2, 3)
 func (b SelectBuilder) Column(column interface{}, args ...interface{}) SelectBuilder {
 	return builder.Append(b, "Columns", newPart(column, args...)).(SelectBuilder)
 }
@@ -400,16 +401,19 @@ func (b SelectBuilder) SuffixExpr(expr Sqlizer) SelectBuilder {
 // returns and error if filterSt is not a struct or if the filters Struct has no bindings with the db tag defined.
 // NOTE: filter will not be applied if it is a Zero value
 func (b SelectBuilder) Filters(filtersSt any) (SelectBuilder, error) {
-	filtersMap, err := MarshallDB(filtersSt)
+	filtersMap, filtersFields, err := MarshallDB(filtersSt)
 	if err != nil {
 		return b, err
 	}
-
 	// Iterate through all the filters to make the where clause
-	for field, value := range filtersMap {
+	// to iterate in the correct order a slice is necessary
+	// maps do not interate in a fix order, its ramdomized since go 1.0
+	for _, field := range filtersFields {
+		value := filtersMap[field]
 		reflection := reflect.ValueOf(value)
 		if !reflection.IsZero() {
-			b = b.Where(fmt.Sprintf("%s = ?", field), value)
+			value = fmt.Sprintf("%s%v%s", "%", value, "%")
+			b = b.Where(fmt.Sprintf("%s like ?", field), value)
 		}
 	}
 	return b, nil
