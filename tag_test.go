@@ -1,8 +1,9 @@
 package squirrel
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestDBTAGOK(t *testing.T) {
@@ -16,7 +17,7 @@ func TestDBTAGOK(t *testing.T) {
 	}
 	expected := "db_name_field"
 
-	result, err := DatabaseFieldName(st, "Name")
+	result, err := DBTAG(st, "Name")
 	assert.Nil(t, err)
 	assert.Equal(t, result, expected)
 }
@@ -30,7 +31,7 @@ func TestDBTAGNoField(t *testing.T) {
 		Name:     "Testing",
 		Lastname: "More Testing",
 	}
-	_, err := DatabaseFieldName(st, "TEST")
+	_, err := DBTAG(st, "TEST")
 	assert.NotNil(t, err)
 	assert.Equal(t, err, errFieldNotFound)
 }
@@ -44,7 +45,7 @@ func TestDBTAGNoTag(t *testing.T) {
 		Name:     "Testing",
 		Lastname: "More Testing",
 	}
-	_, err := DatabaseFieldName(st, "Lastname")
+	_, err := DBTAG(st, "Lastname")
 	assert.NotNil(t, err)
 	assert.Equal(t, err, errEmptyDBTag)
 }
@@ -52,7 +53,7 @@ func TestDBTAGNoTag(t *testing.T) {
 func TestDBTAGNoStruct(t *testing.T) {
 	testing := "test"
 
-	_, err := DatabaseFieldName(testing, "Field")
+	_, err := DBTAG(testing, "Field")
 	assert.NotNil(t, err)
 	assert.Equal(t, err, errNotAStruct)
 }
@@ -86,16 +87,18 @@ func TestMarshallDBOK(t *testing.T) {
 	expected["db_table.name"] = "Testing"
 	expected["db_table.age"] = 15
 	expected["db_table.is_something"] = &boolValue
-
-	result, err := FieldValuesFromInputStruct(st)
+	expectedFields := []string{"db_table.test", "db_table.name", "db_table.age", "db_table.is_something"}
+	result, stFileds, err := MarshallDB(st)
 	assert.Nil(t, err)
 	assert.Equal(t, expected, result)
+	assert.Equal(t, stFileds, expectedFields)
+
 }
 
 func TestMarshallDBNoStruct(t *testing.T) {
 	testing := "test"
 
-	_, err := FieldValuesFromInputStruct(testing)
+	_, _, err := MarshallDB(testing)
 	assert.NotNil(t, err)
 	assert.Equal(t, err, errNotAStruct)
 }
@@ -112,8 +115,9 @@ func TestMarshallDBEmptyResult(t *testing.T) {
 		Age:      15,
 	}
 	expected := map[string]interface{}{}
-
-	result, err := FieldValuesFromInputStruct(st)
+	expectedFields := []string{}
+	result, stFileds, err := MarshallDB(st)
 	assert.Nil(t, err)
 	assert.Equal(t, result, expected)
+	assert.Equal(t, stFileds, expectedFields)
 }
