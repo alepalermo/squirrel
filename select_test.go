@@ -463,12 +463,14 @@ func TestAddFiltersOK(t *testing.T) {
 		Lastname: "More Testing",
 		Age:      15,
 	}
-	query := sq.Select("table.name, table.last_name, table.age").From("table")
+	query := Select("table.name, table.last_name, table.age").From("table")
 
-	expected := query.Where("table.name = ?", filters.Name).Where("table.last_name = ?", filters.Lastname).Where("table.age = ?", filters.Age)
-
-	result, err := AddSelectFilters(query, filters)
-
+	expected := "SELECT table.name, table.last_name, table.age FROM table WHERE table.name like ? AND table.last_name like ? AND table.age like ?"
+	//expectedArgs :=
+	result, err := query.Filters(filters)
 	assert.Nil(t, err)
-	assert.Equal(t, expected, result)
+	resultSql, resultArgs, err := result.ToSql()
+	assert.Nil(t, err)
+	assert.Equal(t, expected, resultSql)
+	assert.Equal(t, resultArgs, []interface{}{"%Testing%", "%More Testing%", "%15%"})
 }
